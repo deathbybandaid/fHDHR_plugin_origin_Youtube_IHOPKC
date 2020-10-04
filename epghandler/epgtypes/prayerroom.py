@@ -56,15 +56,15 @@ class PrayerRoomEPG():
 
     def __init__(self, config, serviceproxy):
 
-        self.config = config.config
+        self.config = config.copy()
         self.serviceproxy = serviceproxy
 
         self.postalcode = None
 
         self.epg_cache = None
-        self.cache_dir = config.config["prayerroom"]["prayerroom_web_cache"]
-        self.epg_cache_file = config.config["prayerroom"]["epg_cache"]
-        self.pdf_sched = config.config["prayerroom"]["pdf_file"]
+        self.cache_dir = self.config["prayerroom"]["prayerroom_web_cache"]
+        self.epg_cache_file = self.config["prayerroom"]["epg_cache"]
+        self.pdf_sched = self.config["prayerroom"]["pdf_file"]
         self.pdf_sched_url = ("https://s3.amazonaws.com/"
                               "ihopkc.org-prod-site/wp-content/uploads/"
                               "sites/108/2020/09/01171428/"
