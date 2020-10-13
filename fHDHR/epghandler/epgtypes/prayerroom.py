@@ -1,10 +1,10 @@
 import os
-import json
 import datetime
 import urllib.request
 import tabula
 import pytz
 import calendar
+import pathlib
 
 
 class FixedOffset(datetime.tzinfo):
@@ -54,35 +54,17 @@ def convert24(str1):
 
 class PrayerRoomEPG():
 
-    def __init__(self, config, serviceproxy):
+    def __init__(self, settings, origserv):
+        self.config = settings
+        self.origserv = origserv
 
-        self.config = config.copy()
-        self.serviceproxy = serviceproxy
+        self.web_cache_dir = self.config.dict["filedir"]["epg_cache"]["prayerroom"]["web_cache"]
+        self.pdf_sched = pathlib.Path(self.web_cache_dir).joinpath('sched.pdf')
 
-        self.postalcode = None
-
-        self.epg_cache = None
-        self.cache_dir = self.config["prayerroom"]["prayerroom_web_cache"]
-        self.epg_cache_file = self.config["prayerroom"]["epg_cache"]
-        self.pdf_sched = self.config["prayerroom"]["pdf_file"]
         self.pdf_sched_url = ("https://s3.amazonaws.com/"
                               "ihopkc.org-prod-site/wp-content/uploads/"
                               "sites/108/2020/09/01171428/"
                               "24-Hours-Schedule-A-8-24-2020.pdf")
-        self.epg_cache = self.epg_cache_open()
-
-    def epg_cache_open(self):
-        epg_cache = None
-        if os.path.isfile(self.epg_cache_file):
-            with open(self.epg_cache_file, 'r') as epgfile:
-                epg_cache = json.load(epgfile)
-        return epg_cache
-
-    def thumb_url(self, thumb_type, base_url, thumbnail):
-        if thumb_type == "channel":
-            return thumbnail
-        elif thumb_type == "content":
-            return thumbnail
 
     def download_pdf_epg(self):
 
@@ -234,8 +216,6 @@ class PrayerRoomEPG():
         return self.scrape_pdf()
 
     def update_epg(self):
-        print('Updating Prayer Room EPG cache file.')
-
         clean_sched_dict = self.pull_pdf_epg_data()
 
         programguide = {}
@@ -270,14 +250,15 @@ class PrayerRoomEPG():
                                 }
                 events_list.append(curreventdict)
 
-        for c in self.serviceproxy.get_channels():
+        for c in self.origserv.get_channels():
+
             if str(c["number"]) not in list(programguide.keys()):
                 programguide[str(c["number"])] = {
                                                     "callsign": c["callsign"],
                                                     "name": c["name"],
                                                     "number": c["number"],
                                                     "id": c["id"],
-                                                    "thumbnail": self.serviceproxy.get_channel_thumbnail(c["id"]),
+                                                    "thumbnail": "https://yt3.ggpht.com/a/AATXAJyF27VVvcRYjnggXVY8NVwND68nWqzpXj5zaB2tUg=s176-c-k-c0x00ffffff-no-rj-mo",
                                                     "listing": [],
                                                     }
 
@@ -298,7 +279,7 @@ class PrayerRoomEPG():
                                     "time_start": event['time_start'],
                                     "time_end": event['time_end'],
                                     "duration_minutes": event['duration_minutes'],
-                                    "thumbnail": self.serviceproxy.get_content_thumbnail(c["id"]),
+                                    "thumbnail": "https://i.ytimg.com/vi/%s/maxresdefault.jpg" % (str(c["id"])),
                                     "title": event['title'],
                                     "sub-title": event["start_kc_time"] + " Kansas City Time",
                                     "description": description,
@@ -314,10 +295,6 @@ class PrayerRoomEPG():
 
                 programguide[str(c["number"])]["listing"].append(clean_prog_dict)
 
-        self.epg_cache = programguide
-        with open(self.epg_cache_file, 'w') as epgfile:
-            epgfile.write(json.dumps(programguide, indent=4))
-        print('Wrote updated Prayer Room EPG cache file.')
         return programguide
 
     def get_online_file_time(self):
