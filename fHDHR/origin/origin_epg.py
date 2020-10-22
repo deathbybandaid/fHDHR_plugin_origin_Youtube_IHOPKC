@@ -296,7 +296,7 @@ class originEPG():
                                     "seasonnumber": None,
                                     "episodenumber": None,
                                     "isnew": False,
-                                    "id": str(c["id"]) + "_" + str(event['time_start']).split(" "),
+                                    "id": str(c["id"]) + "_" + str(event['time_start']).split(" ")[0],
                                     }
 
                 programguide[str(c["number"])]["listing"].append(clean_prog_dict)
