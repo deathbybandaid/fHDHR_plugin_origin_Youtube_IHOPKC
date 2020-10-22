@@ -6,6 +6,8 @@ import pytz
 import calendar
 import pathlib
 
+import fHDHR.tools
+
 
 class FixedOffset(datetime.tzinfo):
     """Fixed UTC offset: `local = utc + offset`."""
@@ -52,13 +54,17 @@ def convert24(str1):
         return (str(int(str1[:2]) + 12) + str1[2:8]).replace("PM", "")
 
 
-class PrayerRoomEPG():
+class originEPG():
 
-    def __init__(self, settings, origserv):
+    def __init__(self, settings, channels):
         self.config = settings
-        self.origserv = origserv
+        self.channels = channels
 
-        self.web_cache_dir = self.config.dict["filedir"]["epg_cache"]["prayerroom"]["web_cache"]
+        self.web = fHDHR.tools.WebReq()
+
+        self.base_api_url = 'https://api.pluto.tv'
+        self.web_cache_dir = self.config.dict["filedir"]["epg_cache"]["origin"]["web_cache"]
+
         self.pdf_sched = pathlib.Path(self.web_cache_dir).joinpath('sched.pdf')
 
         self.pdf_sched_url = ("https://s3.amazonaws.com/"
@@ -250,7 +256,7 @@ class PrayerRoomEPG():
                                 }
                 events_list.append(curreventdict)
 
-        for c in self.origserv.get_channels():
+        for c in self.channels.get_channels():
 
             if str(c["number"]) not in list(programguide.keys()):
                 programguide[str(c["number"])] = {
@@ -290,7 +296,7 @@ class PrayerRoomEPG():
                                     "seasonnumber": None,
                                     "episodenumber": None,
                                     "isnew": False,
-                                    "id": event['time_start'],
+                                    "id": str(c["id"]) + "_" + str(event['time_start']).split(" "),
                                     }
 
                 programguide[str(c["number"])]["listing"].append(clean_prog_dict)
