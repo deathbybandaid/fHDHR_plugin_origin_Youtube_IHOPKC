@@ -6,7 +6,8 @@ import pytz
 import calendar
 import pathlib
 
-import fHDHR.tools
+from seleniumwire import webdriver
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
 
 class FixedOffset(datetime.tzinfo):
@@ -54,15 +55,13 @@ def convert24(str1):
         return (str(int(str1[:2]) + 12) + str1[2:8]).replace("PM", "")
 
 
-class originEPG():
+class OriginEPG():
 
-    def __init__(self, settings, channels):
+    def __init__(self, settings, logger, web):
         self.config = settings
-        self.channels = channels
+        self.logger = logger
+        self.web = web
 
-        self.web = fHDHR.tools.WebReq()
-
-        self.base_api_url = 'https://api.pluto.tv'
         self.web_cache_dir = self.config.dict["filedir"]["epg_cache"]["origin"]["web_cache"]
 
         self.pdf_sched = pathlib.Path(self.web_cache_dir).joinpath('sched.pdf')
@@ -72,7 +71,17 @@ class originEPG():
                               "sites/108/2020/09/01171428/"
                               "24-Hours-Schedule-A-8-24-2020.pdf")
 
+    def get_pdf_sched_url(self):
+        driver = self.get_firefox_driver()
+        driver.get("https://www.ihopkc.org/prayerroom/")
+        pdf_sched_url = driver.find_element_by_css_selector("#content > div.sc-fznLxA.eIkBnq.below.simpleContent > div > div.extra > ul > li:nth-child(9) > a").get_attribute("href")
+        driver.close()
+        driver.quit()
+        return pdf_sched_url
+
     def download_pdf_epg(self):
+
+        pdf_sched_url = self.get_pdf_sched_url()
 
         why_download = None
 
@@ -80,20 +89,20 @@ class originEPG():
             why_download = "PDF cache missing."
         else:
 
-            print("Checking online PDF for updates.")
+            self.logger.info("Checking online PDF for updates.")
 
             offline_file_time = self.get_offline_file_time()
             online_file_time = self.get_online_file_time()
 
             if not offline_file_time <= online_file_time:
-                print("Cached PDF is current.")
+                self.logger.info("Cached PDF is current.")
             else:
                 why_download = "Online PDF is newer."
 
         if why_download:
             self.clear_database_cache()
-            print(why_download + ' Downloading the latest PDF...')
-            urllib.request.urlretrieve(self.pdf_sched_url, self.pdf_sched)
+            self.logger.info(why_download + ' Downloading the latest PDF...')
+            urllib.request.urlretrieve(pdf_sched_url, self.pdf_sched)
 
     def scrape_pdf(self):
 
@@ -221,7 +230,7 @@ class originEPG():
         self.download_pdf_epg()
         return self.scrape_pdf()
 
-    def update_epg(self):
+    def update_epg(self, fhdhr_channels):
         clean_sched_dict = self.pull_pdf_epg_data()
 
         programguide = {}
@@ -256,7 +265,7 @@ class originEPG():
                                 }
                 events_list.append(curreventdict)
 
-        for c in self.channels.get_channels():
+        for c in fhdhr_channels.get_channels():
 
             if str(c["number"]) not in list(programguide.keys()):
                 programguide[str(c["number"])] = {
@@ -285,7 +294,7 @@ class originEPG():
                                     "time_start": event['time_start'],
                                     "time_end": event['time_end'],
                                     "duration_minutes": event['duration_minutes'],
-                                    "thumbnail": "https://i.ytimg.com/vi/%s/maxresdefault.jpg" % (str(c["id"])),
+                                    "thumbnail": "https://i.ytimg.com/vi/%s/maxresdefault.jpg" % (str(fhdhr_channels.origin.video_reference[c["id"]]["video_id"])),
                                     "title": event['title'],
                                     "sub-title": event["start_kc_time"] + " Kansas City Time",
                                     "description": description,
@@ -317,6 +326,25 @@ class originEPG():
         return offline_file_time
 
     def clear_database_cache(self):
-        print("Clearing PDF cache.")
+        self.logger.info("Clearing PDF cache.")
         if os.path.exists(self.pdf_sched):
             os.remove(self.pdf_sched)
+
+    def get_firefox_driver(self):
+        ff_options = FirefoxOptions()
+        ff_options.add_argument('--headless')
+
+        firefox_profile = webdriver.FirefoxProfile()
+        firefox_profile.set_preference('permissions.default.image', 2)
+        firefox_profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
+        firefox_profile.set_preference('dom.disable_beforeunload', True)
+        firefox_profile.set_preference('browser.tabs.warnOnClose', False)
+        firefox_profile.set_preference('media.volume_scale', '0.0')
+
+        set_seleniumwire_options = {
+                                    'connection_timeout': None,
+                                    'verify_ssl': False,
+                                    'suppress_connection_errors': True
+                                    }
+        driver = webdriver.Firefox(seleniumwire_options=set_seleniumwire_options, options=ff_options, firefox_profile=firefox_profile)
+        return driver

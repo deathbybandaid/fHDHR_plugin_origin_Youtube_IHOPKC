@@ -1,69 +1,50 @@
-import json
-import urllib.request
-import urllib.parse
 import pafy
 
-import fHDHR.tools
 
+class OriginChannels():
 
-class OriginService():
-
-    def __init__(self, settings):
+    def __init__(self, settings, origin, logger, web):
         self.config = settings
-
-        self.web = fHDHR.tools.WebReq()
+        self.origin = origin
+        self.logger = logger
+        self.web = web
 
         self.video_reference = {}
-
-    def get_status_dict(self):
-        ret_status_dict = {}
-        return ret_status_dict
+        self.channel_id = "UCqSYig9Cmx6DJ3XaUYg4vpw"
 
     def get_channels(self):
 
-        conf_channel_list = self.config.dict['origin']["streams"]
-        if isinstance(conf_channel_list, str):
-            conf_channel_list = [conf_channel_list]
+        channel_api_url = ('https://www.googleapis.com/youtube/v3/search?channelId=%s&order=date&eventType=live&type=video&key=%s&part=snippet'
+                           % (self.channel_id, str(self.config.dict["youtube"]["api_key"])))
+        channel_api_response = self.web.session.get(channel_api_url)
+        channel_api_data = channel_api_response.json()
 
-        channel_list = []
-        for station in conf_channel_list:
+        video_id = channel_api_data["items"][0]["id"]["videoId"]
 
-            station_item = {}
-            if station in list(self.config.dict.keys()):
-                for channel_key in ["number", "name", "videoid"]:
-                    if channel_key in list(self.config.dict[station]):
-                        station_item[channel_key] = str(self.config.dict[station][channel_key])
+        clean_station_item = {
+                                "name": "IHOP Prayer Room",
+                                "callsign": "International House of Prayer",
+                                "id": self.channel_id,
+                                }
 
-            if station_item["videoid"] not in list(self.video_reference.keys()):
-                self.video_reference[station_item["videoid"]] = {}
+        self.video_reference = {}
+        self.video_reference[self.channel_id] = {
+                                            "title": channel_api_data["items"][0]["snippet"]["title"],
+                                            "description": channel_api_data["items"][0]["snippet"]["description"],
+                                            "channel_id": self.channel_id,
+                                            "channel_name": channel_api_data["items"][0]["snippet"]["channelTitle"],
+                                            "video_id": video_id
+                                            }
 
-            video_api_url = ('https://www.googleapis.com/youtube/v3/videos?id=%s&part=snippet,contentDetails&key=%s' %
-                             (station_item["videoid"], str(self.config.dict["origin"]["api_key"])))
-            video_response = urllib.request.urlopen(video_api_url)
-            video_data = json.load(video_response)
-
-            self.video_reference[station_item["videoid"]]["title"] = video_data["items"][0]["snippet"]["title"]
-            self.video_reference[station_item["videoid"]]["description"] = video_data["items"][0]["snippet"]["description"]
-            self.video_reference[station_item["videoid"]]["channel_id"] = video_data["items"][0]["snippet"]["channelId"]
-            self.video_reference[station_item["videoid"]]["channel_name"] = video_data["items"][0]["snippet"]["channelTitle"]
-
-            clean_station_item = {
-                                    "name": station_item["name"],
-                                    "callsign": self.video_reference[station_item["videoid"]]["channel_name"],
-                                    "id": station_item["videoid"],
-                                    }
-            if "number" in list(station_item.keys()):
-                clean_station_item["number"] = float(station_item["number"])
-
-            channel_list.append(clean_station_item)
-
-        return channel_list
+        return [clean_station_item]
 
     def get_channel_stream(self, chandict, allchandict):
-        caching = True
-        streamlist = []
-        streamdict = {}
-        pafyobj = pafy.new(chandict["id"])
-        streamdict = {"number": chandict["number"], "stream_url": str(pafyobj.getbest().url)}
-        streamlist.append(streamdict)
+        caching = False
+        pafyobj = pafy.new(self.video_reference[chandict["id"]]["video_id"])
+        streamlist = [
+                        {
+                         "number": chandict["number"],
+                         "stream_url": str(pafyobj.getbest().url)
+                         }
+                    ]
         return streamlist, caching
