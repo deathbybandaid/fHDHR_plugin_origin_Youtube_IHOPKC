@@ -4,3 +4,4 @@ flask
 image
 pafy
 tabula-py
+sqlalchemy
