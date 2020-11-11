@@ -3,11 +3,9 @@ import pafy
 
 class OriginChannels():
 
-    def __init__(self, settings, origin, logger, web):
-        self.config = settings
+    def __init__(self, fhdhr, origin):
+        self.fhdhr = fhdhr
         self.origin = origin
-        self.logger = logger
-        self.web = web
 
         self.video_reference = {}
         self.channel_id = "UCqSYig9Cmx6DJ3XaUYg4vpw"
@@ -15,8 +13,8 @@ class OriginChannels():
     def get_channels(self):
 
         channel_api_url = ('https://www.googleapis.com/youtube/v3/search?channelId=%s&order=date&eventType=live&type=video&key=%s&part=snippet'
-                           % (self.channel_id, str(self.config.dict["youtube"]["api_key"])))
-        channel_api_response = self.web.session.get(channel_api_url)
+                           % (self.channel_id, str(self.fhdhr.config.dict["youtube"]["api_key"])))
+        channel_api_response = self.fhdhr.web.session.get(channel_api_url)
         channel_api_data = channel_api_response.json()
 
         video_id = channel_api_data["items"][0]["id"]["videoId"]

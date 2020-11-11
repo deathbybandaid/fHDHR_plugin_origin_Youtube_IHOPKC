@@ -57,14 +57,12 @@ def convert24(str1):
 
 class OriginEPG():
 
-    def __init__(self, settings, logger, web):
-        self.config = settings
-        self.logger = logger
-        self.web = web
+    def __init__(self, fhdhr):
+        self.fhdhr = fhdhr
 
-        self.web_cache_dir = self.config.dict["filedir"]["epg_cache"]["origin"]["web_cache"]
+        self.fhdhr.web_cache_dir = self.fhdhr.config.dict["filedir"]["epg_cache"]["origin"]["web_cache"]
 
-        self.pdf_sched = pathlib.Path(self.web_cache_dir).joinpath('sched.pdf')
+        self.pdf_sched = pathlib.Path(self.fhdhr.web_cache_dir).joinpath('sched.pdf')
 
         self.pdf_sched_url = ("https://s3.amazonaws.com/"
                               "ihopkc.org-prod-site/wp-content/uploads/"
@@ -89,19 +87,19 @@ class OriginEPG():
             why_download = "PDF cache missing."
         else:
 
-            self.logger.info("Checking online PDF for updates.")
+            self.fhdhr.logger.info("Checking online PDF for updates.")
 
             offline_file_time = self.get_offline_file_time()
             online_file_time = self.get_online_file_time()
 
             if not offline_file_time <= online_file_time:
-                self.logger.info("Cached PDF is current.")
+                self.fhdhr.logger.info("Cached PDF is current.")
             else:
                 why_download = "Online PDF is newer."
 
         if why_download:
             self.clear_database_cache()
-            self.logger.info(why_download + ' Downloading the latest PDF...')
+            self.fhdhr.logger.info(why_download + ' Downloading the latest PDF...')
             urllib.request.urlretrieve(pdf_sched_url, self.pdf_sched)
 
     def scrape_pdf(self):
@@ -326,7 +324,7 @@ class OriginEPG():
         return offline_file_time
 
     def clear_database_cache(self):
-        self.logger.info("Clearing PDF cache.")
+        self.fhdhr.logger.info("Clearing PDF cache.")
         if os.path.exists(self.pdf_sched):
             os.remove(self.pdf_sched)
 
