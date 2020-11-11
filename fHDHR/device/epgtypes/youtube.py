@@ -3,20 +3,18 @@ import datetime
 
 class youtubeEPG():
 
-    def __init__(self, settings, channels, logger, web, db):
-        self.config = settings
-        self.logger = logger
+    def __init__(self, fhdhr, channels):
+        self.fhdhr = fhdhr
+
         self.channels = channels
-        self.web = web
-        self.db = db
 
     def get_channel_thumbnail(self, videoid):
         if "channel_thumbnail" not in list(self.channels.origin.video_reference[videoid].keys()):
 
             channel_id = self.channels.origin.video_reference[videoid]["channel_id"]
             channel_api_url = ('https://www.googleapis.com/youtube/v3/channels?id=%s&part=snippet,contentDetails&key=%s' %
-                               (channel_id, str(self.config.dict["youtube"]["api_key"])))
-            channel_response = self.web.session.get(channel_api_url)
+                               (channel_id, str(self.fhdhr.config.dict["youtube"]["api_key"])))
+            channel_response = self.fhdhr.web.session.get(channel_api_url)
             channel_data = channel_response.json()
 
             self.channels.origin.video_reference[videoid]["channel_thumbnail"] = channel_data["items"][0]["snippet"]["thumbnails"]["high"]["url"]
