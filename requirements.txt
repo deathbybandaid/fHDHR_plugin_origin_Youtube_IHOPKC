@@ -5,5 +5,5 @@ image
 pafy
 tabula-py
 sqlalchemy
-pycrypto
+pycryptodome
 m3u8
