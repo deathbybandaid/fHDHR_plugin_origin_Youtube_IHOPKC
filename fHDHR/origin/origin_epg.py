@@ -60,7 +60,7 @@ class OriginEPG():
     def __init__(self, fhdhr):
         self.fhdhr = fhdhr
 
-        self.fhdhr.web_cache_dir = self.fhdhr.config.dict["filedir"]["epg_cache"]["origin"]["web_cache"]
+        self.fhdhr.web_cache_dir = self.fhdhr.config.internal["paths"]["cache_dir"]
 
         self.pdf_sched = pathlib.Path(self.fhdhr.web_cache_dir).joinpath('sched.pdf')
 
