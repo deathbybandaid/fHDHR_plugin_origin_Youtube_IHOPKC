@@ -270,7 +270,7 @@ class OriginEPG():
                                                     "callsign": c["callsign"],
                                                     "name": c["name"],
                                                     "number": c["number"],
-                                                    "id": c["id"],
+                                                    "id": c["origin_id"],
                                                     "thumbnail": "https://yt3.ggpht.com/a/AATXAJyF27VVvcRYjnggXVY8NVwND68nWqzpXj5zaB2tUg=s176-c-k-c0x00ffffff-no-rj-mo",
                                                     "listing": [],
                                                     }
@@ -292,7 +292,7 @@ class OriginEPG():
                                     "time_start": event['time_start'],
                                     "time_end": event['time_end'],
                                     "duration_minutes": event['duration_minutes'],
-                                    "thumbnail": "https://i.ytimg.com/vi/%s/maxresdefault.jpg" % (str(fhdhr_channels.origin.video_reference[c["id"]]["video_id"])),
+                                    "thumbnail": "https://i.ytimg.com/vi/%s/maxresdefault.jpg" % (str(fhdhr_channels.origin.video_reference[c["origin_id"]]["video_id"])),
                                     "title": event['title'],
                                     "sub-title": event["start_kc_time"] + " Kansas City Time",
                                     "description": description,
@@ -303,7 +303,7 @@ class OriginEPG():
                                     "seasonnumber": None,
                                     "episodenumber": None,
                                     "isnew": False,
-                                    "id": str(c["id"]) + "_" + str(event['time_start']).split(" ")[0],
+                                    "id": str(c["origin_id"]) + "_" + str(event['time_start']).split(" ")[0],
                                     }
 
                 programguide[str(c["number"])]["listing"].append(clean_prog_dict)
