@@ -36,13 +36,7 @@ class OriginChannels():
 
         return [clean_station_item]
 
-    def get_channel_stream(self, chandict, allchandict):
-        caching = False
-        pafyobj = pafy.new(self.video_reference[chandict["id"]]["video_id"])
-        streamlist = [
-                        {
-                         "number": chandict["number"],
-                         "stream_url": str(pafyobj.getbest().url)
-                         }
-                    ]
-        return streamlist, caching
+    def get_channel_stream(self, chandict):
+        pafyobj = pafy.new(self.video_reference[chandict["origin_id"]]["video_id"])
+        stream_url = str(pafyobj.getbest().url)
+        return stream_url

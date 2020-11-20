@@ -16,7 +16,7 @@
                           "config_web": false
                         },
           "valid_epg_methods":{
-                          "value": "None,blocks,origin",
+                          "value": "None,blocks,origin,youtube",
                           "config_file": false,
                           "config_web": false
                         },
