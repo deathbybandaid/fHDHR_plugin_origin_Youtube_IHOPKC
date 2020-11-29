@@ -31,7 +31,8 @@ class OriginChannels():
                                             "description": channel_api_data["items"][0]["snippet"]["description"],
                                             "channel_id": self.channel_id,
                                             "channel_name": channel_api_data["items"][0]["snippet"]["channelTitle"],
-                                            "video_id": video_id
+                                            "video_id": video_id,
+                                            "thumbnail": "https://yt3.ggpht.com/a/AATXAJyF27VVvcRYjnggXVY8NVwND68nWqzpXj5zaB2tUg=s176-c-k-c0x00ffffff-no-rj-mo"
                                             }
 
         return [clean_station_item]
