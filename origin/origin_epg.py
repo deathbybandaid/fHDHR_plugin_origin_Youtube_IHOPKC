@@ -263,17 +263,11 @@ class OriginEPG():
                                 }
                 events_list.append(curreventdict)
 
-        for c in fhdhr_channels.get_channels():
+        for fhdhr_id in list(fhdhr_channels.list.keys()):
+            chan_obj = fhdhr_channels.list[fhdhr_id]
 
-            if str(c["number"]) not in list(programguide.keys()):
-                programguide[str(c["number"])] = {
-                                                    "callsign": c["callsign"],
-                                                    "name": c["name"],
-                                                    "number": c["number"],
-                                                    "id": c["origin_id"],
-                                                    "thumbnail": "https://yt3.ggpht.com/a/AATXAJyF27VVvcRYjnggXVY8NVwND68nWqzpXj5zaB2tUg=s176-c-k-c0x00ffffff-no-rj-mo",
-                                                    "listing": [],
-                                                    }
+            if str(chan_obj.dict["number"]) not in list(programguide.keys()):
+                programguide[str(chan_obj.dict["number"])] = chan_obj.epgdict
 
             for event in events_list:
                 description = "Kansas City Time: " + event["start_kc_time"]
@@ -292,7 +286,7 @@ class OriginEPG():
                                     "time_start": event['time_start'],
                                     "time_end": event['time_end'],
                                     "duration_minutes": event['duration_minutes'],
-                                    "thumbnail": "https://i.ytimg.com/vi/%s/maxresdefault.jpg" % (str(fhdhr_channels.origin.video_reference[c["origin_id"]]["video_id"])),
+                                    "thumbnail": "https://i.ytimg.com/vi/%s/maxresdefault.jpg" % (str(fhdhr_channels.origin.video_reference[chan_obj.dict["origin_id"]]["video_id"])),
                                     "title": event['title'],
                                     "sub-title": event["start_kc_time"] + " Kansas City Time",
                                     "description": description,
@@ -303,10 +297,11 @@ class OriginEPG():
                                     "seasonnumber": None,
                                     "episodenumber": None,
                                     "isnew": False,
-                                    "id": str(c["origin_id"]) + "_" + str(event['time_start']).split(" ")[0],
+                                    "id": str(chan_obj.dict["origin_id"]) + "_" + str(event['time_start']).split(" ")[0],
                                     }
 
-                programguide[str(c["number"])]["listing"].append(clean_prog_dict)
+                if not any(d['id'] == clean_prog_dict['id'] for d in programguide[str(chan_obj.dict["number"])]["listing"]):
+                    programguide[str(chan_obj.dict["number"])]["listing"].append(clean_prog_dict)
 
         return programguide
 
