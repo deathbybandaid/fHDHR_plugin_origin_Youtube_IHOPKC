@@ -254,8 +254,8 @@ class OriginEPG():
                 time_start = time_start.astimezone(pytz.utc)
                 time_end = time_end.astimezone(pytz.utc)
                 curreventdict = {
-                                "time_start": str(time_start.strftime('%Y%m%d%H%M%S')) + " +0000",
-                                "time_end": str(time_end.strftime('%Y%m%d%H%M%S')) + " +0000",
+                                "time_start": time_start.timestamp(),
+                                "time_end": time_end.timestamp(),
                                 "duration_minutes": duration_minutes,
                                 "title": event["title"],
                                 "assignments": event["assignments"],
