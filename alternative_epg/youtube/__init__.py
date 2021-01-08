@@ -67,7 +67,7 @@ class youtubeEPG():
                                     "seasonnumber": None,
                                     "episodenumber": None,
                                     "isnew": False,
-                                    "id": str(c["origin_id"]) + "_" + str(timestamp['time_start']).split(" ")[0],
+                                    "id": "%s_%s" % (c["origin_id"], str(timestamp['time_start']).split(" ")[0]),
                                     }
 
                 programguide[str(c["number"])]["listing"].append(clean_prog_dict)
