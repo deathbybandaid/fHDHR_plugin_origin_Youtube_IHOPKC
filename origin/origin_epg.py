@@ -38,7 +38,7 @@ def convert24(str1):
     # Checking if last two elements of time
     # is AM and first two elements are 12
     if str1[-2:] == "AM" and str1[:2] == "12":
-        return "00" + str1[2:-2]
+        return "00%s" % str1[2:-2]
 
     # remove the AM
     elif str1[-2:] == "AM":
@@ -99,7 +99,7 @@ class OriginEPG():
 
         if why_download:
             self.clear_database_cache()
-            self.fhdhr.logger.info(why_download + ' Downloading the latest PDF...')
+            self.fhdhr.logger.info("%s Downloading the latest PDF..." % why_download)
             urllib.request.urlretrieve(pdf_sched_url, self.pdf_sched)
 
     def scrape_pdf(self):
@@ -182,7 +182,7 @@ class OriginEPG():
                 if schedule_dict[current_time]["title"] == '':
                     schedule_dict[current_time]["title"] += table_item
                 else:
-                    schedule_dict[current_time]["title"] += (" " + table_item)
+                    schedule_dict[current_time]["title"] += (" %s" % table_item)
             else:
                 current_day = daysofweek[current_day_index]
                 if current_day not in list(schedule_dict[current_time].keys()):
@@ -237,7 +237,7 @@ class OriginEPG():
 
         # convert KC time to UTC
         kctime = pytz.timezone("America/Chicago")
-        today_naive = datetime.datetime.strptime(str(datetime.date.today()) + " 00:00:00", "%Y-%m-%d %H:%M:%S")
+        today_naive = datetime.datetime.strptime("%s 00:00:00" % datetime.date.today(), "%Y-%m-%d %H:%M:%S")
         kc_dt = kctime.localize(today_naive)
         for x in range(0, 6):
             xdate = kc_dt + datetime.timedelta(days=x)
@@ -270,7 +270,7 @@ class OriginEPG():
                 programguide[str(chan_obj.number)] = chan_obj.epgdict
 
             for event in events_list:
-                description = "Kansas City Time: " + event["start_kc_time"]
+                description = "Kansas City Time: %s" % event["start_kc_time"]
                 assignment_reference = {
                                         "WL": "Worship Leader",
                                         "A": "Associate WL",
@@ -280,7 +280,7 @@ class OriginEPG():
                 for assignment in list(event['assignments']):
                     assignment_title = assignment_reference[assignment]
                     assignment_person = event['assignments'][assignment]
-                    description += str(", " + assignment_title + ": " + assignment_person)
+                    description += str(", %s:%s" % (assignment_title,  assignment_person))
 
                 clean_prog_dict = {
                                     "time_start": event['time_start'],
@@ -288,7 +288,7 @@ class OriginEPG():
                                     "duration_minutes": event['duration_minutes'],
                                     "thumbnail": "https://i.ytimg.com/vi/%s/maxresdefault.jpg" % (str(fhdhr_channels.origin.video_reference[chan_obj.dict["origin_id"]]["video_id"])),
                                     "title": event['title'],
-                                    "sub-title": event["start_kc_time"] + " Kansas City Time",
+                                    "sub-title": "%s Kansas City Time" % event["start_kc_time"],
                                     "description": description,
                                     "rating": "N/A",
                                     "episodetitle": None,
@@ -297,7 +297,7 @@ class OriginEPG():
                                     "seasonnumber": None,
                                     "episodenumber": None,
                                     "isnew": False,
-                                    "id": str(chan_obj.dict["origin_id"]) + "_" + str(event['time_start']).split(" ")[0],
+                                    "id": "%s_%s" % (chan_obj.dict["origin_id"], str(event['time_start']).split(" ")[0]),
                                     }
 
                 if not any(d['id'] == clean_prog_dict['id'] for d in programguide[str(chan_obj.number)]["listing"]):
