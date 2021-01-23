@@ -14,11 +14,6 @@
                           "value": "fHDHR_Youtube-IHOPKC",
                           "config_file": false,
                           "config_web": false
-                        },
-          "required":{
-                          "value": "youtube/api_key",
-                          "config_file": false,
-                          "config_web": false
                         }
   },
   "fhdhr":{
@@ -45,12 +40,5 @@
                           "config_web": false
                         }
   },
-  "prayerroom":{},
-  "youtube":{
-          "api_key":{
-                    "value": "none",
-                    "config_file": true,
-                    "config_web": true
-                }
-  }
+  "prayerroom":{}
 }

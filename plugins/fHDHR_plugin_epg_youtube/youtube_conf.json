@@ -3,7 +3,8 @@
           "api_key":{
                     "value": "none",
                     "config_file": true,
-                    "config_web": true
+                    "config_web": true,
+                    "required": true
                 }
   }
 }

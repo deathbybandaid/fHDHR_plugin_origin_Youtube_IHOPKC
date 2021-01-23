@@ -5,6 +5,11 @@ PLUGIN_VERSION = "v0.6.0-beta"
 PLUGIN_TYPE = "alt_epg"
 
 
+class YOUTUBE_Setup():
+    def __init__(self, config):
+        pass
+
+
 class youtubeEPG():
 
     def __init__(self, fhdhr, channels):
