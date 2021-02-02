@@ -1,0 +1,2 @@
+pafy
+tabula-py
