@@ -6,6 +6,9 @@ class Plugin_OBJ():
     def __init__(self, plugin_utils):
         self.plugin_utils = plugin_utils
 
+        self.tuners = self.plugin_utils.config.dict["ihopkc"]["tuners"]
+        self.stream_method = self.plugin_utils.config.dict["ihopkc"]["stream_method"]
+
         self.video_reference = {}
         self.channel_id = "UCqSYig9Cmx6DJ3XaUYg4vpw"
 
