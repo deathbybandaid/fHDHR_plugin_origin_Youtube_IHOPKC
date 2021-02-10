@@ -6,16 +6,25 @@ class Plugin_OBJ():
     def __init__(self, plugin_utils):
         self.plugin_utils = plugin_utils
 
-        self.tuners = self.plugin_utils.config.dict["ihopkc"]["tuners"]
-        self.stream_method = self.plugin_utils.config.dict["ihopkc"]["stream_method"]
-
         self.video_reference = {}
         self.channel_id = "UCqSYig9Cmx6DJ3XaUYg4vpw"
+
+    @property
+    def tuners(self):
+        return self.plugin_utils.config.dict["ihopkc"]["tuners"]
+
+    @property
+    def stream_method(self):
+        return self.plugin_utils.config.dict["ihopkc"]["stream_method"]
+
+    @property
+    def youtube_api_key(self):
+        return self.plugin_utils.config.dict["youtube"]["api_key"]
 
     def get_channels(self):
 
         channel_api_url = ('https://www.googleapis.com/youtube/v3/search?channelId=%s&order=date&eventType=live&type=video&key=%s&part=snippet'
-                           % (self.channel_id, str(self.plugin_utils.config.dict["youtube"]["api_key"])))
+                           % (self.channel_id, self.youtube_api_key))
         channel_api_response = self.plugin_utils.web.session.get(channel_api_url)
         channel_api_data = channel_api_response.json()
 
